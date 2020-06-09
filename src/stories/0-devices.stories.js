@@ -6,17 +6,8 @@ import { getDevices } from "../store/actions";
 
 export const DeviceList = () => {
   const {
-    state: { intialized, devices },
-    dispatch,
+    state: { devices },
   } = useContext(CounterContext);
-
-  useEffect(() => {
-    if (intialized) {
-      getDevices().then((updatedDevices) =>
-        dispatch({ type: "FETCH_DEVICES", payload: updatedDevices })
-      );
-    }
-  }, [intialized]);
 
   return (
     <div>

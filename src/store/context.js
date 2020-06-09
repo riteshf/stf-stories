@@ -1,18 +1,47 @@
 import React, { useReducer, createContext, useEffect } from "react";
+import { mergeLeft, pathOr } from "ramda";
 
-import { authinticate } from "./actions";
+import { authinticate, getDevices } from "./actions";
 const initialState = {
   intialized: false,
   devices: [],
+  logs: [],
 };
 
 const reducerFunction = (state, action) => {
   switch (action.type) {
     case "INITIALIZE": {
-      return { ...state, intialized: action.payload };
+      return mergeLeft(
+        {
+          intialized: action.payload,
+        },
+        state
+      );
     }
     case "FETCH_DEVICES": {
-      return { ...state, devices: action.payload };
+      return mergeLeft(
+        {
+          devices: action.payload,
+        },
+        state
+      );
+    }
+    case "ADD_LOG": {
+      const oldLogs = pathOr([], ["logs"], state);
+      return mergeLeft(
+        {
+          logs: [...oldLogs, action.payload],
+        },
+        state
+      );
+    }
+    case "CLEAR_LOGS": {
+      return mergeLeft(
+        {
+          logs: [],
+        },
+        state
+      );
     }
     default:
       throw new Error();
@@ -23,10 +52,18 @@ const CounterContext = createContext(initialState);
 
 function CounterProvider(props) {
   const [state, dispatch] = useReducer(reducerFunction, initialState);
+
+  const initialize = async () => {
+    const isAuthenticated = await authinticate();
+    dispatch({ type: "INITIALIZE", payload: isAuthenticated });
+    if (isAuthenticated) {
+      const devices = await getDevices();
+      dispatch({ type: "FETCH_DEVICES", payload: devices });
+    }
+  };
+
   useEffect(() => {
-    authinticate().then((isAuthenticated) =>
-      dispatch({ type: "INITIALIZE", payload: isAuthenticated })
-    );
+    initialize();
   }, []);
 
   return (
