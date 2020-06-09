@@ -2,14 +2,14 @@ import React, { useReducer, createContext, useEffect } from "react";
 
 import { authinticate } from "./actions";
 const initialState = {
-  initialize: false,
+  intialized: false,
   devices: [],
 };
 
 const reducerFunction = (state, action) => {
   switch (action.type) {
     case "INITIALIZE": {
-      return { ...state, initialize: action.payload };
+      return { ...state, intialized: action.payload };
     }
     case "FETCH_DEVICES": {
       return { ...state, devices: action.payload };
