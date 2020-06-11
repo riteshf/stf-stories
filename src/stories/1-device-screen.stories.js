@@ -1,5 +1,5 @@
 //  vendor
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { storiesOf } from "@storybook/react";
 import { Button } from "reactstrap";
 import { v4 as uuidv4 } from "uuid";
@@ -11,22 +11,17 @@ import { CounterContext } from "../store/context";
 // socket
 import { socket } from "../socket";
 
-export const DeviceList = () => {
-  const [device, setDevice] = useState("");
-
-  const { state, dispatch } = useContext(CounterContext);
-  const devices = pathOr([], ["devices"], state);
-  const logs = pathOr([], ["logs"], state);
-  const socketInvokation = (d) => {
+export const DeviceList = ({ device, logs, dispatch }) => {
+  const socketInvokation = () => {
     socket
       .emit(
         "group.invite",
-        d.channel,
+        device.channel,
         "tx.2265bd83-e987-4cd4-99a0-ee7b567d8fba",
         {
           requirements: {
             serial: {
-              value: d.serial,
+              value: device.serial,
               match: "exact",
             },
           },
@@ -37,12 +32,8 @@ export const DeviceList = () => {
       });
   };
   useEffect(() => {
-    if (devices.length > 0) {
-      const device1 = devices[0];
-      socketInvokation(device1);
-      setDevice(device1);
-    }
-  }, [devices]);
+    socketInvokation();
+  }, []);
 
   const getLogs = () => {
     const response = socket.emit(
@@ -91,4 +82,13 @@ export const DeviceList = () => {
   );
 };
 
-storiesOf("Logs", module).add("First Devices", () => <DeviceList />);
+storiesOf("Screen", module).add("First Devices", () => {
+  const { state, dispatch } = useContext(CounterContext);
+  const device = pathOr(false, ["devices", 0], state);
+  const logs = pathOr([], ["logs"], state);
+  return device ? (
+    <DeviceList device={device} logs={logs} dispatch={dispatch} />
+  ) : (
+    <></>
+  );
+});

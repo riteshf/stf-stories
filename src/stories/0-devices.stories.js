@@ -1,22 +1,21 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { storiesOf } from "@storybook/react";
+import { pathOr } from "ramda";
 
 import { CounterContext } from "../store/context";
-import { getDevices } from "../store/actions";
 
-export const DeviceList = () => {
-  const {
-    state: { devices },
-  } = useContext(CounterContext);
+export const DeviceList = ({ devices }) => (
+  <div>
+    Listing Device Market Name:
+    {devices.map((device, i) => (
+      <div key={i}>{device.marketName}</div>
+    ))}
+  </div>
+);
 
-  return (
-    <div>
-      Listing Device Market Name:
-      {devices.map((device, i) => (
-        <div key={i}>{device.marketName}</div>
-      ))}
-    </div>
-  );
-};
+storiesOf("Device Listing", module).add("Devices", () => {
+  const { state, dispatch } = useContext(CounterContext);
+  const devices = pathOr(false, ["devices"], state);
 
-storiesOf("Device Listing", module).add("All Devices", () => <DeviceList />);
+  return devices.length > 0 ? <DeviceList devices={devices} /> : <></>;
+});

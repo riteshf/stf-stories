@@ -1,4 +1,4 @@
-import React, { useReducer, createContext } from "react";
+import React, { useReducer, createContext, useEffect } from "react";
 
 import { authinticate, getDevices } from "./actions";
 import { initialState, reducerFunction } from "./reducer";
@@ -17,7 +17,8 @@ function CounterProvider(props) {
 
   const [state, dispatch] = useReducer(reducerFunction, initialState);
 
-  initialize();
+  useEffect(initialize, []);
+
   return (
     <CounterContext.Provider value={{ state, dispatch }}>
       {props.children}
