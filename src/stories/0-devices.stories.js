@@ -14,8 +14,8 @@ export const DeviceList = ({ devices }) => (
 );
 
 storiesOf("Device Listing", module).add("Devices", () => {
-  const { state, dispatch } = useContext(CounterContext);
-  const devices = pathOr(false, ["devices"], state);
+  const { state } = useContext(CounterContext);
+  const devices = pathOr([], ["devices"], state);
 
   return devices.length > 0 ? <DeviceList devices={devices} /> : <></>;
 });

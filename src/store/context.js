@@ -17,7 +17,9 @@ function CounterProvider(props) {
 
   const [state, dispatch] = useReducer(reducerFunction, initialState);
 
-  useEffect(initialize, []);
+  useEffect(() => {
+    if (!state.intialized) initialize();
+  }, []);
 
   return (
     <CounterContext.Provider value={{ state, dispatch }}>
