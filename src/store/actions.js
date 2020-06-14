@@ -15,30 +15,16 @@ export const contact = async (dispatch) => {
 };
 
 export const authenticate = async (dispatch) => {
-  const isAunthenticated = await contact(dispatch);
-  const csrfToken = getCookie("XSRF-TOKEN");
-  if (isAunthenticated) {
-    try {
-      const { status } = await fetch("http://localhost:7100/auth/api/v1/mock", {
-        method: "POST",
-        mode: "cors",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "X-XSRF-TOKEN": csrfToken,
-        },
-        body: JSON.stringify({
-          name: "riteshf",
-          email: "firodiya.ritesh@gmail.com",
-        }),
-      });
-
-      const success = status === 200 || status === 204;
-      dispatch({ type: "AUTHENTICATE", payload: success });
-      return success;
-    } catch (error) {
-      return false;
-    }
+  try {
+    const { status } = await fetch("http://localhost:7100/auth/mock/", {
+      method: "GET",
+      mode: "cors",
+      credentials: "include",
+    });
+    dispatch({ type: "INITIALIZE", payload: status === 200 });
+    return status === 200;
+  } catch (error) {
+    return false;
   }
 };
 

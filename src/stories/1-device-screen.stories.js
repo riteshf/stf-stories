@@ -36,8 +36,8 @@ export const DeviceList = () => {
       });
   };
   useEffect(() => {
-    socketInvokation();
-  }, []);
+    if (device.channel) socketInvokation();
+  }, [device]);
 
   const getLogs = () => {
     const response = socket.emit(
