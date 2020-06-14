@@ -11,7 +11,11 @@ import { CounterContext } from "../store/context";
 // socket
 import { socket } from "../socket";
 
-export const DeviceList = ({ device, logs, dispatch }) => {
+export const DeviceList = () => {
+  const { state, dispatch } = useContext(CounterContext);
+  const device = pathOr({}, ["devices", 0], state);
+  const logs = pathOr([], ["logs"], state);
+
   const socketInvokation = () => {
     socket
       .emit(
@@ -82,13 +86,4 @@ export const DeviceList = ({ device, logs, dispatch }) => {
   );
 };
 
-storiesOf("Screen", module).add("First Devices", () => {
-  const { state, dispatch } = useContext(CounterContext);
-  const device = pathOr(false, ["devices", 0], state);
-  const logs = pathOr([], ["logs"], state);
-  return device ? (
-    <DeviceList device={device} logs={logs} dispatch={dispatch} />
-  ) : (
-    <></>
-  );
-});
+storiesOf("Logs", module).add("First Devices", () => <DeviceList />);

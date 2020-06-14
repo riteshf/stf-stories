@@ -1,29 +1,25 @@
 import React, { useReducer, createContext, useEffect } from "react";
 
-import { authinticate, getDevices } from "./actions";
+import { getDevices } from "./actions";
 import { initialState, reducerFunction } from "./reducer";
+import { Container } from "reactstrap";
 
 const CounterContext = createContext(initialState);
 
 function CounterProvider(props) {
-  const initialize = async () => {
-    const isAuthenticated = await authinticate();
-    dispatch({ type: "INITIALIZE", payload: isAuthenticated });
-    if (isAuthenticated) {
-      const devices = await getDevices();
-      dispatch({ type: "FETCH_DEVICES", payload: devices });
-    }
-  };
-
   const [state, dispatch] = useReducer(reducerFunction, initialState);
 
+  const initialize = async () => {
+    await getDevices(dispatch);
+  };
+
   useEffect(() => {
-    if (!state.intialized) initialize();
+    initialize();
   }, []);
 
   return (
     <CounterContext.Provider value={{ state, dispatch }}>
-      {props.children}
+      <Container>{props.children}</Container>
     </CounterContext.Provider>
   );
 }

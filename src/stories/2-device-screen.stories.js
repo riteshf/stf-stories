@@ -1,5 +1,5 @@
 //  vendor
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { storiesOf } from "@storybook/react";
 import { Button } from "reactstrap";
 import CanvasDraw from "react-canvas-draw";
@@ -20,22 +20,33 @@ const BLANK_IMG =
 
 var cssTransform = VendorUtil(["transform", "webkitTransform"]);
 
-export const DeviceList = ({ device, dispatch }) => {
+export const DeviceList = () => {
+  const { state, dispatch } = useContext(CounterContext);
   const [imgSrc, setImgSrc] = useState();
-  const ws = new WebSocket(device.display.url);
-  ws.binaryType = "blob";
 
-  ws.onerror = function errorListener() {
-    // @todo Handle
-  };
+  const device = pathOr({}, ["devices", 0], state);
+  useEffect(() => {
+    if (device.serial) {
+      const ws = new WebSocket(device.display.url);
+      ws.binaryType = "blob";
 
-  ws.onclose = function closeListener() {
-    // @todo Maybe handle
-  };
+      ws.onerror = function errorListener() {
+        // @todo Handle
+      };
 
-  ws.onopen = function openListener() {
-    // checkEnabled();
-  };
+      ws.onclose = function closeListener() {
+        // @todo Maybe handle
+      };
+
+      ws.onopen = function openListener() {
+        // things to do on connections opened
+      };
+
+      ws.onmessage = (e) => {
+        console.log(e);
+      };
+    }
+  }, [device]);
 
   const getLogs = () => {};
 
@@ -61,9 +72,4 @@ export const DeviceList = ({ device, dispatch }) => {
   );
 };
 
-storiesOf("Screen", module).add("First Devices", () => {
-  const { state, dispatch } = useContext(CounterContext);
-  const device = pathOr(false, ["devices", 0], state);
-
-  return device ? <DeviceList device={device} dispatch={dispatch} /> : <></>;
-});
+storiesOf("Screen", module).add("First Devices", () => <DeviceList />);

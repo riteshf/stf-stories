@@ -2,6 +2,7 @@ import { mergeLeft, pathOr } from "ramda";
 
 export const initialState = {
   intialized: false,
+  authenticate: false,
   devices: [],
   logs: [],
 };
@@ -9,6 +10,14 @@ export const initialState = {
 export const reducerFunction = (state, action) => {
   switch (action.type) {
     case "INITIALIZE": {
+      return mergeLeft(
+        {
+          intialized: action.payload,
+        },
+        state
+      );
+    }
+    case "AUTHENTICATE": {
       return mergeLeft(
         {
           intialized: action.payload,
