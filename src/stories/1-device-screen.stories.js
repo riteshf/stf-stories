@@ -18,50 +18,42 @@ export const DeviceList = () => {
 
   const socketInvokation = () => {
     socket
-      .emit(
-        "group.invite",
-        device.channel,
-        "tx.2265bd83-e987-4cd4-99a0-ee7b567d8fba",
-        {
-          requirements: {
-            serial: {
-              value: device.serial,
-              match: "exact",
-            },
+      .emit("group.invite", device.channel, `tx.${uuidv4()}`, {
+        requirements: {
+          serial: {
+            value: device.serial,
+            match: "exact",
           },
-        }
-      )
+        },
+      })
+      .emit("user.settings.update", {
+        lastUsedDevice: device.serial,
+      })
+      .emit("connect.start", device.channel, `tx.${uuidv4()}`, null)
       .on("logcat.entry", (rawData) => {
         dispatch({ type: "ADD_LOG", payload: rawData.message });
       });
   };
+
   useEffect(() => {
     if (device.channel) socketInvokation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
   const getLogs = () => {
-    const response = socket.emit(
-      "logcat.start",
-      device.channel,
-      `tx.${uuidv4()}`,
-      {
-        filters: [],
-      }
-    );
+    socket.emit("logcat.start", device.channel, `tx.${uuidv4()}`, {
+      filters: [],
+    });
   };
 
   const stopLogs = () => {
-    const response = socket.emit(
-      "logcat.stop",
-      device.channel,
-      `tx.${uuidv4()}`,
-      {
-        filters: [],
-      }
-    );
+    socket.emit("logcat.stop", device.channel, `tx.${uuidv4()}`, {
+      filters: [],
+    });
   };
 
   const clearLogs = () => dispatch({ type: "CLEAR_LOGS" });
+
   return (
     <div>
       Device: {device.marketName}
