@@ -7,7 +7,7 @@ import { pathOr } from "ramda";
 import { CounterContext } from "../store/context";
 
 // components
-import { DeviceScreen } from "./device-screen";
+import { DeviceScreen } from "../components/device-screen/device-screen";
 
 export const DeviceList = () => {
   const { state } = useContext(CounterContext);

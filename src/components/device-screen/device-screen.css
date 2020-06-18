@@ -1,0 +1,50 @@
+.fill-height {
+  height: 100%;
+}
+
+.device-screen {
+  width: 821px;
+  height: 821px;
+  background: gray;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  /*cursor: pointer;*/
+  text-align: center; /* needed for centering after rotating to 270 */
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.device-screen .positioner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  pointer-events: none;
+  transform: rotate(0deg);
+}
+
+.device-screen canvas.screen {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+
+  pointer-events: none; /* MUST HAVE or touch coordinates will be off */
+  transition: -webkit-transform 250ms ease-in-out;
+  -webkit-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+  -webkit-transform: rotate(0deg);
+  transform: rotate(0deg);
+}
