@@ -1,18 +1,10 @@
-.enter-fade {
-  -webkit-transition: 1s linear opacity;
-  -moz-transition: 1s linear opacity;
-  -o-transition: 1s linear opacity;
-  transition: 1s linear opacity;
-  opacity: 0;
-}
-
-.enter-fade.enter-fade-active {
-  opacity: 1;
+.fill-height {
+  height: 100%;
 }
 
 .device-screen {
-  width: 100%;
-  height: 100%;
+  width: 821px;
+  height: 821px;
   background: gray;
   position: relative;
   display: block;

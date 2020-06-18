@@ -1,10 +1,9 @@
 //  vendor
 import React, { useRef, useState, useEffect } from "react";
 import { Button } from "reactstrap";
-import { v4 as uuidv4 } from "uuid";
 
 // socket
-import { socket } from "../../socket";
+import { socket, emitDeviceConnect } from "../../socket";
 
 // utils
 import {
@@ -34,8 +33,9 @@ const options = {
 const parentAspect = 1;
 
 export const DeviceScreen = ({ device }) => {
-  const canvasRef = useRef(null);
-  const positionerRef = useRef(null);
+  const canvasRef = useRef();
+  const positionerRef = useRef();
+  const deviceScreenRef = useRef();
 
   const [canvasAspect, setCanvasAspect] = useState(1);
   const [adjustedBoundSize, setAdjustedBoundSize] = useState({
@@ -69,9 +69,9 @@ export const DeviceScreen = ({ device }) => {
     },
   });
 
-  const onScreenInterestAreaChanged = (ws) => {
+  const onScreenInterestAreaChanged = (ws, newAdjustedBoundSize) => {
     if (ws.readyState === WebSocket.OPEN) {
-      ws.send("size " + adjustedBoundSize.w + "x" + adjustedBoundSize.h);
+      ws.send("size " + newAdjustedBoundSize.w + "x" + newAdjustedBoundSize.h);
     }
   };
 
@@ -89,12 +89,10 @@ export const DeviceScreen = ({ device }) => {
   };
 
   function applyQuirks(banner) {
-    document
-      .getElementById(device.serial)
-      .classList.toggle(
-        "quirk-always-upright",
-        (imgProps.alwaysUpright = banner.quirks.alwaysUpright)
-      );
+    deviceScreenRef.current.classList.toggle(
+      "quirk-always-upright",
+      (imgProps.alwaysUpright = banner.quirks.alwaysUpright)
+    );
   }
 
   function hasImageAreaChanged(img) {
@@ -151,10 +149,10 @@ export const DeviceScreen = ({ device }) => {
 
     if (isRotated(screen) && !imgProps.alwaysUpright) {
       setCanvasAspect(img.height / img.width);
-      document.getElementById(device.serial).classList.add("rotated");
+      deviceScreenRef.current.classList.add("rotated");
     } else {
       setCanvasAspect(img.width / img.height);
-      document.getElementById(device.serial).classList.remove("rotated");
+      deviceScreenRef.current.classList.remove("rotated");
     }
 
     if (imgProps.alwaysUpright) {
@@ -168,19 +166,16 @@ export const DeviceScreen = ({ device }) => {
   }
 
   function maybeFlipLetterbox() {
-    document
-      .getElementById(device.serial)
-      .classList.toggle("letterboxed", parentAspect < canvasAspect);
+    deviceScreenRef.current.classList.toggle(
+      "letterboxed",
+      parentAspect < canvasAspect
+    );
   }
 
   function updateBounds(ws) {
     // FIXME: element is an object HTMLUnknownElement in IE9
-    const w = (screen.bounds.w = document.getElementById(
-      device.serial
-    ).offsetWidth);
-    const h = (screen.bounds.h = document.getElementById(
-      device.serial
-    ).offsetHeight);
+    const w = (screen.bounds.w = deviceScreenRef.current.offsetWidth);
+    const h = (screen.bounds.h = deviceScreenRef.current.offsetHeight);
 
     // Developer error, let's try to reduce debug time
     if (!w || !h) {
@@ -195,7 +190,7 @@ export const DeviceScreen = ({ device }) => {
       newAdjustedBoundSize.h !== adjustedBoundSize.h
     ) {
       setAdjustedBoundSize(newAdjustedBoundSize);
-      onScreenInterestAreaChanged(ws);
+      onScreenInterestAreaChanged(ws, newAdjustedBoundSize);
     }
   }
 
@@ -278,39 +273,33 @@ export const DeviceScreen = ({ device }) => {
     setCachedEnabled(newEnabled);
   };
 
-  const socketInvokation = () => {
-    const { connected } = socket
-      .emit("group.invite", device.channel, `tx.${uuidv4()}`, {
-        requirements: {
-          serial: { value: device.serial, match: "exact" },
-        },
-      })
-      .emit("user.settings.update", {
-        lastUsedDevice: device.serial,
-      })
-      .emit("connect.start", device.channel, `tx.${uuidv4()}`, null);
-
-    connected && screenShare();
-  };
-
-  const screenShare = () => {
+  useEffect(() => {
+    emitDeviceConnect(device);
     const ws = new WebSocket(device.display.url);
     ws.onmessage = (m) => onmessage(m, ws);
     ws.onopen = () => onopen(ws);
-  };
-  useEffect(() => {
-    socketInvokation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    socket.on("tx.done", (completedTaskId) => {
+      socket.emit("tx.cleanup", completedTaskId);
+    });
+
+    return onScreenInterestLost(ws);
   }, []);
 
   return (
-    <div>
-      <div>
-        <Button color="primary">Portrait</Button>
-        <Button color="primary">Landscape</Button>
-        <Button color="danger">HIDE Screen</Button>
+    <div className="fill-height">
+      <div style={{ padding: "10px" }}>
+        <Button color="primary" style={{ marginLeft: "10px" }}>
+          Get Screen
+        </Button>
+        <Button color="primary" style={{ marginLeft: "10px" }}>
+          Landscape
+        </Button>
+        <Button color="danger" style={{ marginLeft: "10px" }}>
+          HIDE Screen
+        </Button>
       </div>
-      <div className="device-screen" id={device.serial}>
+      <div className="device-screen" ref={deviceScreenRef} id={device.serial}>
         <div className="positioner" ref={positionerRef}>
           <canvas
             className="screen"

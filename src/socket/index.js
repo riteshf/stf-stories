@@ -1,5 +1,6 @@
 import socketIOClient from "socket.io-client";
 import url from "url";
+import { v4 as uuidv4 } from "uuid";
 
 // constants
 const wsUrl = url.parse("http://localhost:7110", true);
@@ -11,3 +12,18 @@ export const socket = socketIOClient(websocketUrl, {
   reconnection: false,
   transports: ["websocket"],
 });
+
+export const emitDeviceConnect = (device) => {
+  const { connected } = socket
+    .emit("group.invite", device.channel, `tx.${uuidv4()}`, {
+      requirements: {
+        serial: { value: device.serial, match: "exact" },
+      },
+    })
+    .emit("user.settings.update", {
+      lastUsedDevice: device.serial,
+    })
+    .emit("connect.start", device.channel, `tx.${uuidv4()}`, null);
+
+  return connected;
+};
