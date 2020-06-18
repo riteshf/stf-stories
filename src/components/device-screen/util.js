@@ -25,15 +25,6 @@ export const adjustBoundedSize = (w, h, device) => {
   };
 };
 
-export const adjustedBoundSizeFn = (h, w, device, screen) => {
-  switch (screen.rotation) {
-    case 90:
-    case 270:
-      return adjustBoundedSize(h, w, device);
-    case 0:
-    case 180:
-    /* falls through */
-    default:
-      return adjustBoundedSize(w, h, device);
-  }
+export const adjustedBoundSizeFn = (h, w, device) => {
+  return adjustBoundedSize(w, h, device);
 };

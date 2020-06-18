@@ -6,6 +6,11 @@ import { socket, emitDeviceConnect } from "../../socket";
 
 // utils
 import { adjustedBoundSizeFn } from "./util";
+import {
+  onScreenInterestAreaChanged,
+  onScreenInterestGained,
+  onScreenInterestLost,
+} from "./socket-functions";
 
 // css
 import "./device-screen.css";
@@ -23,46 +28,18 @@ export const DeviceScreen = ({ device }) => {
     h: 0,
   });
   const [cachedEnabled, setCachedEnabled] = useState(false);
-  const [screen, setScreen] = useState({
-    rotation: 0,
-    bounds: {
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0,
-    },
-  });
 
-  const onScreenInterestAreaChanged = (ws, newAdjustedBoundSize) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send("size " + newAdjustedBoundSize.w + "x" + newAdjustedBoundSize.h);
-    }
-  };
-
-  const onScreenInterestGained = (ws, newAdjustedBoundSize) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send("size " + newAdjustedBoundSize.w + "x" + newAdjustedBoundSize.h);
-      ws.send("on");
-    }
-  };
-
-  const onScreenInterestLost = (ws) => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send("off");
-    }
-  };
-
-  function updateBounds(ws) {
+  const updateBounds = (ws) => {
     // FIXME: element is an object HTMLUnknownElement in IE9
-    const w = (screen.bounds.w = deviceScreenRef.current.offsetWidth);
-    const h = (screen.bounds.h = deviceScreenRef.current.offsetHeight);
+    const w = deviceScreenRef.current.offsetWidth;
+    const h = deviceScreenRef.current.offsetHeight;
 
     // Developer error, let's try to reduce debug time
     if (!w || !h) {
       throw new Error("Unable to read bounds; container must have dimensions");
     }
 
-    const newAdjustedBoundSize = adjustedBoundSizeFn(h, w, device, screen);
+    const newAdjustedBoundSize = adjustedBoundSizeFn(h, w, device);
 
     if (
       !adjustedBoundSize ||
@@ -73,7 +50,7 @@ export const DeviceScreen = ({ device }) => {
       onScreenInterestAreaChanged(ws, newAdjustedBoundSize);
       return newAdjustedBoundSize;
     }
-  }
+  };
 
   const onmessage = (message, ws) => {
     if (message.data instanceof Blob) {
@@ -123,6 +100,7 @@ export const DeviceScreen = ({ device }) => {
     });
 
     return () => onScreenInterestLost(ws);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -132,8 +110,8 @@ export const DeviceScreen = ({ device }) => {
           <canvas
             className="screen"
             ref={canvasRef}
-            width="900px"
-            height="900px"
+            width="821px"
+            height="821px"
           />
         </div>
       </div>
