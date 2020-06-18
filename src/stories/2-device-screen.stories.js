@@ -17,9 +17,9 @@ export const DeviceList = () => {
     <div>
       Device: {device.marketName}
       {device.serial && (
-        <>
+        <div>
           <DeviceScreen device={device} />
-        </>
+        </div>
       )}
     </div>
   );

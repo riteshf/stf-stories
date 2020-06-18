@@ -8,8 +8,8 @@ import { pathOr } from "ramda";
 // store
 import { CounterContext } from "../store/context";
 
-// socket
-import { socket } from "../socket";
+// utils
+import { socket } from "../utils/device-control";
 
 export const DeviceList = () => {
   const { state, dispatch } = useContext(CounterContext);
@@ -26,10 +26,6 @@ export const DeviceList = () => {
           },
         },
       })
-      .emit("user.settings.update", {
-        lastUsedDevice: device.serial,
-      })
-      .emit("connect.start", device.channel, `tx.${uuidv4()}`, null)
       .on("logcat.entry", (rawData) => {
         dispatch({ type: "ADD_LOG", payload: rawData.message });
       });

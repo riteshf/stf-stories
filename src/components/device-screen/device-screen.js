@@ -1,16 +1,14 @@
 //  vendor
 import React, { useRef, useState, useEffect } from "react";
 
-// socket
-import { socket, emitDeviceConnect } from "../../socket";
-
 // utils
-import { adjustedBoundSizeFn } from "./util";
+import { socket, emitDeviceConnect } from "../../utils/device-control";
+import { adjustedBoundSizeFn } from "../../utils/screen-bounds";
 import {
   onScreenInterestAreaChanged,
   onScreenInterestGained,
   onScreenInterestLost,
-} from "./socket-functions";
+} from "../../utils/socket-functions";
 
 // css
 import "./device-screen.css";

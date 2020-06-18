@@ -20,7 +20,7 @@
   user-select: none;
 }
 
-.device-screen .positioner {
+.positioner {
   position: absolute;
   top: 0;
   right: 0;
@@ -31,10 +31,10 @@
   transform: rotate(0deg);
 }
 
-.device-screen canvas.screen {
+canvas.screen {
   position: absolute;
-  width: 100%;
-  height: auto;
+  width: auto;
+  height: 100%;
   top: 0;
   right: 0;
   bottom: 0;
