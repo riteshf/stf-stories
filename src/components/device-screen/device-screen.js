@@ -1,31 +1,62 @@
 //  vendor
 import React, { useRef, useState, useEffect } from "react";
 
+// css
+import "./device-screen.css";
+
 // utils
-import { socket, emitDeviceConnect } from "../../utils/device-control";
+import {
+  socket,
+  emitDeviceConnect,
+  gestureStart,
+  touchDown,
+  gestureStop,
+} from "../../utils/device-control";
 import { adjustedBoundSizeFn } from "../../utils/screen-bounds";
 import {
   onScreenInterestAreaChanged,
   onScreenInterestGained,
   onScreenInterestLost,
 } from "../../utils/socket-functions";
-
-// css
-import "./device-screen.css";
+import { scalingService } from "../../utils/scaling";
 
 // constants
 const URL = window.URL || window.webkitURL;
-
 export const DeviceScreen = ({ device }) => {
   const canvasRef = useRef();
-  const positionerRef = useRef();
   const deviceScreenRef = useRef();
 
   const [adjustedBoundSize, setAdjustedBoundSize] = useState({
     w: 0,
     h: 0,
   });
+
   const [cachedEnabled, setCachedEnabled] = useState(false);
+  const [isGuestureStarted, setIsGuestureStarted] = useState(false);
+  const [seq, setSeq] = useState(-1);
+  const [screen, setScreen] = useState({
+    rotation: 0,
+    bounds: {
+      x: 0,
+      y: 0,
+      w: 0,
+      h: 0,
+    },
+  });
+
+  const scaler = scalingService.coordinator(
+    device.display.width,
+    device.display.height
+  );
+
+  function nextSeq(nextValue) {
+    if (nextValue > 100) {
+      setSeq(0);
+    } else {
+      setSeq(nextValue);
+    }
+    return nextValue;
+  }
 
   const updateBounds = (ws) => {
     // FIXME: element is an object HTMLUnknownElement in IE9
@@ -87,6 +118,47 @@ export const DeviceScreen = ({ device }) => {
     setCachedEnabled(newEnabled);
   };
 
+  const onTouchStart = (e) => {
+    e.preventDefault();
+    gestureStart(nextSeq(seq + 1));
+    setIsGuestureStarted(true);
+  };
+
+  const onTouchMove = (e) => {
+    e.preventDefault();
+    if (isGuestureStarted) {
+      const img = canvasRef.current;
+      setScreen({
+        ...screen,
+        bounds: {
+          w: img.offsetWidth,
+          h: img.offsetHeight,
+          x: img.offsetLeft,
+          y: img.offsetTop,
+        },
+      });
+
+      var x = e.pageX - screen.bounds.x;
+      var y = e.pageY - screen.bounds.y;
+      var scaled = scaler.coords(
+        screen.bounds.w,
+        screen.bounds.h,
+        x,
+        y,
+        device.display.rotation
+      );
+      const pressure = e.force || 0.5;
+      touchDown(nextSeq(seq + 1), 0, scaled.xP, scaled.yP, pressure);
+    }
+  };
+
+  const onTouchEnd = (e) => {
+    e.preventDefault();
+    gestureStop(nextSeq(seq + 1));
+    setIsGuestureStarted(false);
+    nextSeq(0);
+  };
+
   useEffect(() => {
     emitDeviceConnect(device);
     const ws = new WebSocket(device.display.url);
@@ -102,17 +174,15 @@ export const DeviceScreen = ({ device }) => {
   }, []);
 
   return (
-    <div className="fill-height">
-      <div className="device-screen" ref={deviceScreenRef} id={device.serial}>
-        <div className="positioner" ref={positionerRef}>
-          <canvas
-            className="screen"
-            ref={canvasRef}
-            width="821px"
-            height="821px"
-          />
-        </div>
-      </div>
+    <div
+      className="device-screen"
+      ref={deviceScreenRef}
+      id={device.serial}
+      onDragStart={onTouchStart}
+      onDrag={onTouchMove}
+      onDragEnd={onTouchEnd}
+    >
+      <canvas className="screen" ref={canvasRef} width="821px" height="821px" />
     </div>
   );
 };

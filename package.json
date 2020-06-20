@@ -13,6 +13,8 @@
     "react-canvas-draw": "^1.1.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
+    "react-spring": "^8.0.27",
+    "react-use-gesture": "^7.0.15",
     "react-websocket": "^2.1.0",
     "reactstrap": "^8.4.1",
     "socket.io": "^2.3.0",

@@ -27,3 +27,14 @@ export const emitDeviceConnect = (device) => {
 
   return connected;
 };
+
+export const gestureStart = () => {
+  console.log("gestureStart");
+};
+
+export const touchDown = () => {
+  console.log("touchDown");
+};
+export const gestureStop = () => {
+  console.log("gestureStop");
+};
