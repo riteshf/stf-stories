@@ -1,6 +1,6 @@
 import React, { useReducer, createContext, useEffect } from "react";
 
-import { getDevices } from "./actions";
+import { getDevices, addDeviceListeners } from "./actions";
 import { initialState, reducerFunction } from "./reducer";
 import { Container } from "reactstrap";
 
@@ -16,6 +16,12 @@ function CounterProvider(props) {
   useEffect(() => {
     initialize();
   }, []);
+
+  useEffect(() => {
+    if (state.authenticate) {
+      addDeviceListeners(dispatch);
+    }
+  }, [state]);
 
   return (
     <CounterContext.Provider value={{ state, dispatch }}>

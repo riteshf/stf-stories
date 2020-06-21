@@ -1,4 +1,4 @@
-import { mergeLeft, pathOr } from "ramda";
+import { mergeLeft, pathOr, mergeDeepLeft } from "ramda";
 
 export const initialState = {
   intialized: false,
@@ -7,6 +7,17 @@ export const initialState = {
   logs: [],
 };
 
+const deepExtend = function (destination, source) {
+  for (var property in source) {
+    if (typeof source[property] === "object" && source[property] !== null) {
+      destination[property] = destination[property] || {};
+      // eslint-disable-next-line no-caller
+      deepExtend(destination[property], source[property]);
+    } else {
+      destination[property] = source[property];
+    }
+  }
+};
 export const reducerFunction = (state, action) => {
   switch (action.type) {
     case "INITIALIZE": {
@@ -20,7 +31,7 @@ export const reducerFunction = (state, action) => {
     case "AUTHENTICATE": {
       return mergeLeft(
         {
-          intialized: action.payload,
+          authenticate: action.payload,
         },
         state
       );
@@ -29,6 +40,50 @@ export const reducerFunction = (state, action) => {
       return mergeLeft(
         {
           devices: action.payload,
+        },
+        state
+      );
+    }
+    case "ADD_DEVICE": {
+      const deviceIndex = state.devices.findIndex(
+        ({ serial }) => serial === action.payload.serial
+      );
+      const newDevices = state.devices.splice(deviceIndex, 1, action.payload);
+
+      return mergeDeepLeft(
+        {
+          devices: newDevices,
+        },
+        state
+      );
+    }
+    case "DEVICE_UPDATE": {
+      const devices = state.devices.map((device) => {
+        if (device.serial === action.payload.serial) {
+          deepExtend(device, action.payload);
+        }
+        return device;
+      });
+
+      return mergeLeft(
+        {
+          devices: devices,
+        },
+        state
+      );
+    }
+    case "REMOVE_DEVICE": {
+      const devices = state.devices.map((device) => {
+        if (device.serial === action.payload.serial) {
+          return action.payload;
+        } else {
+          return device;
+        }
+      });
+
+      return mergeLeft(
+        {
+          devices: devices,
         },
         state
       );

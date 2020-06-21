@@ -9,7 +9,7 @@ import {
   socket,
   emitDeviceConnect,
   gestureStart,
-  touchDown,
+  touchMove,
   gestureStop,
 } from "../../utils/device-control";
 import { adjustedBoundSizeFn } from "../../utils/screen-bounds";
@@ -34,15 +34,6 @@ export const DeviceScreen = ({ device }) => {
   const [cachedEnabled, setCachedEnabled] = useState(false);
   const [isGuestureStarted, setIsGuestureStarted] = useState(false);
   const [seq, setSeq] = useState(-1);
-  const [screen, setScreen] = useState({
-    rotation: 0,
-    bounds: {
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0,
-    },
-  });
 
   const scaler = scalingService.coordinator(
     device.display.width,
@@ -118,46 +109,91 @@ export const DeviceScreen = ({ device }) => {
     setCachedEnabled(newEnabled);
   };
 
-  const onTouchStart = (e) => {
+  const onMouseDown = (e) => {
     e.preventDefault();
-    gestureStart(nextSeq(seq + 1));
+
+    const {
+      offsetWidth,
+      offsetHeight,
+      offsetLeft,
+      offsetTop,
+    } = deviceScreenRef.current;
+
+    const scaled = scaler.coords(
+      offsetWidth,
+      offsetHeight,
+      e.pageX - offsetLeft,
+      e.pageY - offsetTop,
+      device.display.rotation
+    );
+
+    gestureStart(
+      device.channel,
+      {
+        seq: nextSeq(seq + 1),
+      },
+      {
+        seq: nextSeq(seq + 2),
+        contact: 0,
+        x: scaled.xP,
+        y: scaled.yP,
+        pressure: e.force || 0.5,
+      },
+      {
+        seq: nextSeq(seq + 3),
+      }
+    );
     setIsGuestureStarted(true);
   };
 
-  const onTouchMove = (e) => {
+  const onMouseMove = (e) => {
     e.preventDefault();
     if (isGuestureStarted) {
-      const img = canvasRef.current;
-      setScreen({
-        ...screen,
-        bounds: {
-          w: img.offsetWidth,
-          h: img.offsetHeight,
-          x: img.offsetLeft,
-          y: img.offsetTop,
-        },
-      });
+      const {
+        offsetWidth,
+        offsetHeight,
+        offsetLeft,
+        offsetTop,
+      } = deviceScreenRef.current;
 
-      var x = e.pageX - screen.bounds.x;
-      var y = e.pageY - screen.bounds.y;
-      var scaled = scaler.coords(
-        screen.bounds.w,
-        screen.bounds.h,
-        x,
-        y,
+      const scaled = scaler.coords(
+        offsetWidth,
+        offsetHeight,
+        e.pageX - offsetLeft,
+        e.pageY - offsetTop,
         device.display.rotation
       );
-      const pressure = e.force || 0.5;
-      touchDown(nextSeq(seq + 1), 0, scaled.xP, scaled.yP, pressure);
+
+      touchMove(
+        device.channel,
+        {
+          seq: nextSeq(seq + 1),
+          contact: 0,
+          x: scaled.xP,
+          y: scaled.yP,
+          pressure: e.force || 0.5,
+        },
+        {
+          seq: nextSeq(seq + 2),
+        }
+      );
     }
   };
 
-  const onTouchEnd = (e) => {
+  const onMouseUp = (e) => {
     e.preventDefault();
-    gestureStop(nextSeq(seq + 1));
+    gestureStop(device.channel, { seq: nextSeq(seq + 1) });
     setIsGuestureStarted(false);
-    nextSeq(0);
   };
+
+  useEffect(() => {
+    if (isGuestureStarted) {
+      canvasRef.current.onMouseMove = onMouseMove;
+    } else {
+      canvasRef.current.onMouseMove = () => {};
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGuestureStarted]);
 
   useEffect(() => {
     emitDeviceConnect(device);
@@ -178,9 +214,9 @@ export const DeviceScreen = ({ device }) => {
       className="device-screen"
       ref={deviceScreenRef}
       id={device.serial}
-      onDragStart={onTouchStart}
-      onDrag={onTouchMove}
-      onDragEnd={onTouchEnd}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
     >
       <canvas className="screen" ref={canvasRef} width="821px" height="821px" />
     </div>

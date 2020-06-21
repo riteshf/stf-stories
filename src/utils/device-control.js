@@ -28,13 +28,24 @@ export const emitDeviceConnect = (device) => {
   return connected;
 };
 
-export const gestureStart = () => {
-  console.log("gestureStart");
+export const gestureStart = (
+  channel,
+  guestureBody,
+  touchDownBody,
+  commitBody
+) => {
+  socket
+    .emit("input.gestureStart", channel, guestureBody)
+    .emit("input.touchDown", channel, touchDownBody)
+    .emit("input.touchCommit", channel, commitBody);
 };
 
-export const touchDown = () => {
-  console.log("touchDown");
+export const touchMove = (channel, touchMoveBody, commitBody) => {
+  socket
+    .emit("input.touchMove", channel, touchMoveBody)
+    .emit("input.touchCommit", channel, commitBody);
 };
-export const gestureStop = () => {
-  console.log("gestureStop");
+
+export const gestureStop = (channel, guestureBody) => {
+  socket.emit("input.gestureStop", channel, guestureBody);
 };
