@@ -17,7 +17,7 @@ import {
   removeCompleteListener,
 } from "../utils/device-control";
 
-export const DeviceList = () => {
+export const DeviceLogs = () => {
   const { state, dispatch } = useContext(CounterContext);
   const device = pathOr({}, ["devices", 0], state);
   const logs = pathOr([], ["logs"], state);
@@ -61,4 +61,4 @@ export const DeviceList = () => {
   );
 };
 
-storiesOf("Logs", module).add("First Devices", () => <DeviceList />);
+storiesOf("Logs", module).add("First Devices", () => <DeviceLogs />);

@@ -10,7 +10,7 @@ import { CounterContext } from "../store/context";
 // utils
 import { connectDevice, screeshot } from "../utils/device-control";
 
-export const DeviceList = () => {
+export const DeviceScreenShot = () => {
   const { state } = useContext(CounterContext);
   const device = pathOr({}, ["devices", 0], state);
   const [href, setHref] = useState("");
@@ -48,4 +48,6 @@ export const DeviceList = () => {
   );
 };
 
-storiesOf("Screenshot", module).add("First Devices", () => <DeviceList />);
+storiesOf("Screenshot", module).add("First Devices", () => (
+  <DeviceScreenShot />
+));

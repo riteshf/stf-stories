@@ -7,8 +7,7 @@ import "./device-screen.css";
 
 // utils
 import {
-  socket,
-  emitDeviceConnect,
+  connectDevice,
   gestureStart,
   touchMove,
   gestureStop,
@@ -187,7 +186,7 @@ export const DeviceScreen = ({ device }) => {
   };
 
   useEffect(() => {
-    emitDeviceConnect(device);
+    connectDevice(device);
     const ws = new WebSocket(device.display.url);
     ws.onmessage = (m) => onmessage(m, ws);
     ws.onopen = () => onopen(ws);

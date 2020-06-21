@@ -24,7 +24,7 @@ import {
   removeCompleteListener,
 } from "../utils/device-control";
 
-export const DeviceList = () => {
+export const DeviceNavigate = () => {
   const { state } = useContext(CounterContext);
   const device = pathOr({}, ["devices", 0], state);
   const browsers = pathOr([], ["browser", "apps"], device);
@@ -101,4 +101,4 @@ export const DeviceList = () => {
   );
 };
 
-storiesOf("Navigate", module).add("First Devices", () => <DeviceList />);
+storiesOf("Navigate", module).add("First Devices", () => <DeviceNavigate />);
