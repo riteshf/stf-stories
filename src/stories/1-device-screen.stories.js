@@ -2,51 +2,27 @@
 import React, { useContext, useEffect } from "react";
 import { storiesOf } from "@storybook/react";
 import { Button } from "reactstrap";
-import { v4 as uuidv4 } from "uuid";
 import { pathOr } from "ramda";
 
 // store
 import { CounterContext } from "../store/context";
+import { enableAddLogs } from "../store/actions";
 
 // utils
-import { socket } from "../utils/device-control";
+import { connectDevice, getLogs, stopLogs } from "../utils/device-control";
 
 export const DeviceList = () => {
   const { state, dispatch } = useContext(CounterContext);
   const device = pathOr({}, ["devices", 0], state);
   const logs = pathOr([], ["logs"], state);
 
-  const socketInvokation = () => {
-    socket
-      .emit("group.invite", device.channel, `tx.${uuidv4()}`, {
-        requirements: {
-          serial: {
-            value: device.serial,
-            match: "exact",
-          },
-        },
-      })
-      .on("logcat.entry", (rawData) => {
-        dispatch({ type: "ADD_LOG", payload: rawData.message });
-      });
-  };
-
   useEffect(() => {
-    if (device.channel) socketInvokation();
+    if (device.present) {
+      connectDevice(device);
+      enableAddLogs(dispatch);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
-
-  const getLogs = () => {
-    socket.emit("logcat.start", device.channel, `tx.${uuidv4()}`, {
-      filters: [],
-    });
-  };
-
-  const stopLogs = () => {
-    socket.emit("logcat.stop", device.channel, `tx.${uuidv4()}`, {
-      filters: [],
-    });
-  };
 
   const clearLogs = () => dispatch({ type: "CLEAR_LOGS" });
 
@@ -54,10 +30,10 @@ export const DeviceList = () => {
     <div>
       Device: {device.marketName}
       <div>
-        <Button color="primary" onClick={getLogs}>
+        <Button color="primary" onClick={() => getLogs(device)}>
           GET
         </Button>
-        <Button color="danger" onClick={stopLogs}>
+        <Button color="danger" onClick={() => stopLogs(device)}>
           STOP
         </Button>
         <Button color="danger" onClick={clearLogs}>

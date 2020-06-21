@@ -42,6 +42,11 @@ export const addDeviceListeners = (dispatch) => {
     });
 };
 
+export const enableAddLogs = (dispatch) => {
+  socket.on("logcat.entry", (rawData) => {
+    dispatch({ type: "ADD_LOG", payload: rawData.message });
+  });
+};
 export const getDevices = async (dispatch) => {
   const isAunthenticated = await authenticate(dispatch);
   if (isAunthenticated) {

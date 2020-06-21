@@ -13,7 +13,7 @@ export const socket = socketIOClient(websocketUrl, {
   transports: ["websocket"],
 });
 
-export const emitDeviceConnect = (device) => {
+export const connectDevice = (device) => {
   const { connected } = socket
     .emit("group.invite", device.channel, `tx.${uuidv4()}`, {
       requirements: {
@@ -28,6 +28,24 @@ export const emitDeviceConnect = (device) => {
   return connected;
 };
 
+export const getLogs = (device) => {
+  socket.emit("logcat.start", device.channel, `tx.${uuidv4()}`, {
+    filters: [],
+  });
+};
+
+export const stopLogs = (device) => {
+  socket.emit("logcat.stop", device.channel, `tx.${uuidv4()}`, {
+    filters: [],
+  });
+};
+
+export const navigate = (channel, url, browser) => {
+  socket.emit("browser.open", channel, `tx.${uuidv4()}`, {
+    url: url,
+    browser: browser,
+  });
+};
 export const gestureStart = (
   channel,
   guestureBody,
