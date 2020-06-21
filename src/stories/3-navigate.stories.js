@@ -17,7 +17,12 @@ import { pathOr } from "ramda";
 import { CounterContext } from "../store/context";
 
 // utils
-import { connectDevice, navigate } from "../utils/device-control";
+import {
+  connectDevice,
+  navigate,
+  completeListener,
+  removeCompleteListener,
+} from "../utils/device-control";
 
 export const DeviceList = () => {
   const { state } = useContext(CounterContext);
@@ -48,6 +53,10 @@ export const DeviceList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [browsers]);
 
+  useEffect(() => {
+    completeListener();
+    return () => removeCompleteListener();
+  }, []);
   return (
     <div>
       Device: {device.marketName}

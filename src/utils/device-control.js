@@ -1,6 +1,7 @@
 import socketIOClient from "socket.io-client";
 import url from "url";
 import { v4 as uuidv4 } from "uuid";
+import { doneListener } from "./listener";
 
 // constants
 const wsUrl = url.parse("http://localhost:7110", true);
@@ -28,6 +29,13 @@ export const connectDevice = (device) => {
   return connected;
 };
 
+export const completeListener = () => {
+  socket.on("tx.done", doneListener);
+};
+export const removeCompleteListener = () => {
+  socket.removeListener("tx.done", doneListener);
+};
+
 export const getLogs = (device) => {
   socket.emit("logcat.start", device.channel, `tx.${uuidv4()}`, {
     filters: [],
@@ -45,6 +53,12 @@ export const navigate = (channel, url, browser) => {
     url: url,
     browser: browser,
   });
+};
+
+export const screeshot = (channel, callback) => {
+  socket
+    .emit("screen.capture", channel, `tx.${uuidv4()}`, null)
+    .on("tx.done", doneListener, callback);
 };
 export const gestureStart = (
   channel,

@@ -9,7 +9,13 @@ import { CounterContext } from "../store/context";
 import { enableAddLogs } from "../store/actions";
 
 // utils
-import { connectDevice, getLogs, stopLogs } from "../utils/device-control";
+import {
+  connectDevice,
+  getLogs,
+  stopLogs,
+  completeListener,
+  removeCompleteListener,
+} from "../utils/device-control";
 
 export const DeviceList = () => {
   const { state, dispatch } = useContext(CounterContext);
@@ -23,6 +29,11 @@ export const DeviceList = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
+
+  useEffect(() => {
+    completeListener();
+    return () => removeCompleteListener();
+  }, []);
 
   const clearLogs = () => dispatch({ type: "CLEAR_LOGS" });
 

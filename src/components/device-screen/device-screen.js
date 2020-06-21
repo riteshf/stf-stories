@@ -192,10 +192,6 @@ export const DeviceScreen = ({ device }) => {
     ws.onmessage = (m) => onmessage(m, ws);
     ws.onopen = () => onopen(ws);
 
-    socket.on("tx.done", (completedTaskId) => {
-      socket.emit("tx.cleanup", completedTaskId);
-    });
-
     return () => onScreenInterestLost(ws);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
