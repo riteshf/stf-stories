@@ -12,16 +12,20 @@ import {
   touchMove,
   gestureStop,
 } from "../../utils/device-control";
-import { adjustedBoundSizeFn } from "../../utils/screen-bounds";
 import {
   onScreenInterestAreaChanged,
   onScreenInterestGained,
   onScreenInterestLost,
 } from "../../utils/socket-functions";
-import { scalingService } from "../../utils/scaling";
+import {
+  scalingService,
+  vendorBackingStorePixelRatio,
+  adjustedBoundSizeFn,
+} from "./utils";
 
 // constants
 const URL = window.URL || window.webkitURL;
+const devicePixelRatio = window.devicePixelRatio || 1;
 export const DeviceScreen = ({ device }) => {
   const canvasRef = useRef();
   const deviceScreenRef = useRef();
@@ -83,6 +87,12 @@ export const DeviceScreen = ({ device }) => {
         img.onload = function () {
           const canvas = canvasRef.current;
           const g = canvas.getContext("2d");
+          const backingStoreRatio = vendorBackingStorePixelRatio(g);
+          const frontBackRatio = devicePixelRatio / backingStoreRatio;
+          const { width, height } = canvas;
+          canvas.width = width * frontBackRatio;
+          canvas.height = height * frontBackRatio;
+          g.scale(frontBackRatio, frontBackRatio);
           g.clearRect(0, 0, canvas.width, canvas.height);
           g.drawImage(img, 0, 0, img.width, img.height);
         };
