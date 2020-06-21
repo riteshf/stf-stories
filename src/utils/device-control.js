@@ -58,7 +58,10 @@ export const navigate = (channel, url, browser) => {
 export const screeshot = (channel, callback) => {
   socket
     .emit("screen.capture", channel, `tx.${uuidv4()}`, null)
-    .on("tx.done", doneListener, callback);
+    .on("tx.done", (X, data) => {
+      doneListener(X);
+      callback && data && callback(data);
+    });
 };
 export const gestureStart = (
   channel,

@@ -8,14 +8,7 @@ import { pathOr } from "ramda";
 import { CounterContext } from "../store/context";
 
 // utils
-import {
-  connectDevice,
-  capture,
-  completeListener,
-  socket,
-  navigate,
-  screeshot,
-} from "../utils/device-control";
+import { connectDevice, screeshot } from "../utils/device-control";
 
 export const DeviceList = () => {
   const { state } = useContext(CounterContext);
@@ -31,19 +24,26 @@ export const DeviceList = () => {
 
   const capture = () =>
     screeshot(device.channel, (response) => {
-      const { body } = JSON.parse(response);
-      setHref(body.href);
+      const json = JSON.parse(response.body);
+      setHref(json.href);
     });
 
   return (
     <div>
       Device: {device.marketName}
-      <div>
+      <div style={{ paddingBottom: "20px" }}>
         <Button color="primary" onClick={capture}>
           GET
         </Button>
       </div>
-      {href && <image src={href} alt={"no Image"} />}
+      {href && (
+        <img
+          src={`http://localhost:7100${href}`}
+          alt=""
+          width="220px"
+          height="300px"
+        />
+      )}
     </div>
   );
 };

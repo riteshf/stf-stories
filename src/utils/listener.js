@@ -1,5 +1,6 @@
 import { socket } from "./device-control";
 
-export const doneListener = (completedTaskId) => {
-  socket.emit("tx.cleanup", completedTaskId);
+export const doneListener = (someChannel, data) => {
+  socket.emit("tx.cleanup", someChannel);
+  return data;
 };
