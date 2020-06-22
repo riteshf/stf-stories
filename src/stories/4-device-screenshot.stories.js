@@ -8,7 +8,7 @@ import { pathOr } from "ramda";
 import { CounterContext } from "../store/context";
 
 // utils
-import { connectDevice, screeshot } from "../utils/device-control";
+import { connectDevice, screenshot } from "../utils/device-control";
 
 export const DeviceScreenShot = () => {
   const { state } = useContext(CounterContext);
@@ -23,7 +23,7 @@ export const DeviceScreenShot = () => {
   }, [device]);
 
   const capture = () =>
-    screeshot(device.channel, (response) => {
+    screenshot(device.channel, (response) => {
       const json = JSON.parse(response.body);
       setHref(json.href);
     });

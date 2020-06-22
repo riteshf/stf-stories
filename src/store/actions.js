@@ -2,7 +2,7 @@
 import { socket } from "../utils/device-control";
 import { getCookie } from "./utils";
 
-import {serverUrl} from '../environment.json'
+import { serverUrl } from "../environment.json";
 
 const initialize = async (dispatch) => {
   try {
@@ -41,18 +41,15 @@ export const authenticate = async (dispatch) => {
     if (communicate) {
       const headers = new Headers({
         "Content-Type": "application/json",
-        "X-XSRF-TOKEN": getCookie("XSRF-TOKEN"),
-        ssid: getCookie("ssid"),
-        "ssid.sig": getCookie("ssid.sig"),
-        "XSRF-TOKEN": getCookie("XSRF-TOKEN"),
-        
       });
-      const { status } = await fetch(`${serverUrl}/auth/api/v1/mock`, {
+      const response = await fetch(`${serverUrl}/auth/api/v1/mock`, {
         method: "POST",
         mode: "cors",
         headers,
-        body: JSON.stringify({"name":"xxx","email":"aa.bb@gmail.com"}),
+        body: JSON.stringify({ name: "xxx", email: "aa.bb@gmail.com" }),
       });
+      const { redirect } = await response.json();
+      const { status } = await fetch(redirect);
       dispatch({ type: "AUTHENTICATE", payload: status === 200 });
       return status === 200;
     }
@@ -79,7 +76,6 @@ export const getDevices = async (dispatch) => {
     }
   }
 };
-
 
 export const addDeviceListeners = (dispatch) => {
   socket

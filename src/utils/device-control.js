@@ -4,7 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 import { doneListener } from "./listener";
 
 // constants
-const wsUrl = url.parse("http://localhost:7110", true);
+import { socketUrl } from "../environment.json";
+
+const wsUrl = url.parse(socketUrl, true);
 wsUrl.query.uip = window.location.hostname;
 
 const websocketUrl = url.format(wsUrl);
@@ -15,7 +17,7 @@ export const socket = socketIOClient(websocketUrl, {
 });
 
 export const connectDevice = (device) => {
-  const { connected } = socket
+  socket
     .emit("group.invite", device.channel, `tx.${uuidv4()}`, {
       requirements: {
         serial: { value: device.serial, match: "exact" },
@@ -25,8 +27,6 @@ export const connectDevice = (device) => {
       lastUsedDevice: device.serial,
     })
     .emit("connect.start", device.channel, `tx.${uuidv4()}`, null);
-
-  return connected;
 };
 
 export const completeListener = () => {
@@ -55,7 +55,7 @@ export const navigate = (channel, url, browser) => {
   });
 };
 
-export const screeshot = (channel, callback) => {
+export const screenshot = (channel, callback) => {
   socket
     .emit("screen.capture", channel, `tx.${uuidv4()}`, null)
     .on("tx.done", (X, data) => {
@@ -63,6 +63,7 @@ export const screeshot = (channel, callback) => {
       callback && data && callback(data);
     });
 };
+
 export const gestureStart = (
   channel,
   guestureBody,
