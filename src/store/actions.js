@@ -2,7 +2,7 @@
 import { socket } from "../utils/device-control";
 import { getCookie } from "./utils";
 
-import { serverUrl } from "../environment.json";
+import { serverUrl, name, email } from "../environment.json";
 
 const initialize = async (dispatch) => {
   try {
@@ -39,14 +39,13 @@ export const authenticate = async (dispatch) => {
   try {
     const communicate = await contact(dispatch);
     if (communicate) {
-      const headers = new Headers({
-        "Content-Type": "application/json",
-      });
       const response = await fetch(`${serverUrl}/auth/api/v1/mock`, {
         method: "POST",
         mode: "cors",
-        headers,
-        body: JSON.stringify({ name: "xxx", email: "aa.bb@gmail.com" }),
+        body: JSON.stringify({ name, email }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
       const { redirect } = await response.json();
       const { status } = await fetch(redirect);
@@ -59,7 +58,7 @@ export const authenticate = async (dispatch) => {
 };
 
 export const getDevices = async (dispatch) => {
-  const isAunthenticated = await authenticate(dispatch);
+  const isAunthenticated = await initialize(dispatch);
   if (isAunthenticated) {
     try {
       const response = await fetch(`${serverUrl}/api/v1/devices`, {

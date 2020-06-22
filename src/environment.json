@@ -1,4 +1,6 @@
 {
     "serverUrl": "http://localhost:7100",
-    "socketUrl": "http://localhost:7110"
+    "socketUrl": "http://localhost:7110",
+    "name": "xxx", 
+    "email": "aa.bb@gmail.com"
 }
