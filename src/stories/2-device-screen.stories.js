@@ -2,15 +2,16 @@
 import React, { useContext, useEffect } from "react";
 import { storiesOf } from "@storybook/react";
 import { pathOr } from "ramda";
+import { ScreenShare } from "stf-screenshare";
 
 // store
 import { CounterContext } from "../store/context";
 
 // components
-import { DeviceScreen } from "../components/device-screen/device-screen";
 import {
   completeListener,
   removeCompleteListener,
+  socket,
 } from "../utils/device-control";
 
 export const DeviceScreenStory = () => {
@@ -27,7 +28,7 @@ export const DeviceScreenStory = () => {
       Device: {device.marketName}
       {device.present && (
         <div>
-          <DeviceScreen device={device} />
+          <ScreenShare device={device} appSocket={socket} />
         </div>
       )}
     </div>
