@@ -41,7 +41,7 @@ export const DeviceScreenShot = () => {
           src={`http://localhost:7100${href}`}
           alt=""
           width="220px"
-          height="300px"
+          height="389px"
         />
       )}
     </div>
