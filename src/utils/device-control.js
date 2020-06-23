@@ -63,25 +63,3 @@ export const screenshot = (channel, callback) => {
       callback && data && callback(data);
     });
 };
-
-export const gestureStart = (
-  channel,
-  guestureBody,
-  touchDownBody,
-  commitBody
-) => {
-  socket
-    .emit("input.gestureStart", channel, guestureBody)
-    .emit("input.touchDown", channel, touchDownBody)
-    .emit("input.touchCommit", channel, commitBody);
-};
-
-export const touchMove = (channel, touchMoveBody, commitBody) => {
-  socket
-    .emit("input.touchMove", channel, touchMoveBody)
-    .emit("input.touchCommit", channel, commitBody);
-};
-
-export const gestureStop = (channel, guestureBody) => {
-  socket.emit("input.gestureStop", channel, guestureBody);
-};
