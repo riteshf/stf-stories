@@ -1,16 +1,55 @@
 import { socket } from "../utils/device-control";
 
-import { serverUrl } from "../environment.json";
+import { serverUrl, name, email } from "../environment.json";
 
-const authenticate = async (dispatch) => {
+const initialize = async (dispatch) => {
   try {
     const { status } = await fetch(`${serverUrl}/auth/mock/`, {
       method: "GET",
       mode: "cors",
       credentials: "include",
     });
-    dispatch({ type: "AUTHENTICATE", payload: status === 200 });
+    dispatch({ type: "INITIALIZE", payload: status === 200 });
     return status === 200;
+  } catch (error) {
+    return false;
+  }
+};
+
+const contact = async (dispatch) => {
+  try {
+    const mock = await initialize(dispatch);
+    if (mock) {
+      const { status } = await fetch(`${serverUrl}/auth/contact`, {
+        method: "GET",
+        mode: "cors",
+        credentials: "include",
+      });
+      dispatch({ type: "CONTACT", payload: status === 200 });
+      return status === 200;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
+export const authenticate = async (dispatch) => {
+  try {
+    const communicate = await contact(dispatch);
+    if (communicate) {
+      const response = await fetch(`${serverUrl}/auth/api/v1/mock`, {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify({ name, email }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const { redirect } = await response.json();
+      const { status } = await fetch(redirect);
+      dispatch({ type: "AUTHENTICATE", payload: status === 200 });
+      return status === 200;
+    }
   } catch (error) {
     return false;
   }
