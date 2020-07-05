@@ -9,6 +9,7 @@ import { CounterContext } from "../store/context";
 
 // utils
 import { connectDevice, screenshot } from "../utils/device-control";
+import { serverUrl } from "../environment.json";
 
 export const DeviceScreenShot = () => {
   const { state } = useContext(CounterContext);
@@ -37,12 +38,7 @@ export const DeviceScreenShot = () => {
         </Button>
       </div>
       {href && (
-        <img
-          src={`http://localhost:7100${href}`}
-          alt=""
-          width="220px"
-          height="389px"
-        />
+        <img src={`${serverUrl}${href}`} alt="" width="220px" height="389px" />
       )}
     </div>
   );
