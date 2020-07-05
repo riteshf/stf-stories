@@ -1,7 +1,7 @@
 //  vendor
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { storiesOf } from "@storybook/react";
-import { Button } from "reactstrap";
+import { Button, FormGroup, Label, Input, Col } from "reactstrap";
 import { pathOr } from "ramda";
 
 // store
@@ -18,17 +18,20 @@ import {
 } from "../utils/device-control";
 
 export const DeviceLogs = () => {
-  const { state, dispatch } = useContext(CounterContext);
-  const device = pathOr({}, ["devices", 0], state);
-  const logs = pathOr([], ["logs"], state);
+  const {
+    state: { devices, logs },
+    dispatch,
+  } = useContext(CounterContext);
+  const [device, setDevice] = useState({});
 
-  useEffect(() => {
-    if (device.present) {
-      connectDevice(device);
+  const selectDevice = (serial) => {
+    const d = devices.filter((d) => d.serial === serial)[0] || {};
+    connectDevice(d);
+    if (d.present) {
+      setDevice(d);
       enableAddLogs(dispatch);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  };
 
   useEffect(() => {
     completeListener();
@@ -39,18 +42,37 @@ export const DeviceLogs = () => {
 
   return (
     <div>
-      Device: {device.marketName}
-      <div>
-        <Button color="primary" onClick={() => getLogs(device)}>
-          GET
-        </Button>
-        <Button color="danger" onClick={() => stopLogs(device)}>
-          STOP
-        </Button>
-        <Button color="danger" onClick={clearLogs}>
-          CLEAR
-        </Button>
-      </div>
+      <FormGroup row>
+        <Label for="exampleSelect" sm={2}>
+          Select Device
+        </Label>
+        <Col sm={10}>
+          <select
+            value={device.serial}
+            onChange={(e) => selectDevice(e.target.value)}
+          >
+            <option value="aaaaaa">Select a device</option>
+            {devices.map((d, i) => (
+              <option key={i} value={d.serial}>
+                {d.marketName}
+              </option>
+            ))}
+          </select>
+        </Col>
+      </FormGroup>
+      {device.channel && (
+        <div>
+          <Button color="primary" onClick={() => getLogs(device)}>
+            GET
+          </Button>
+          <Button color="danger" onClick={() => stopLogs(device)}>
+            STOP
+          </Button>
+          <Button color="danger" onClick={clearLogs}>
+            CLEAR
+          </Button>
+        </div>
+      )}
       {Array.isArray(logs) &&
         logs.map((message, i) => (
           <div key={i} style={{ display: "block" }}>

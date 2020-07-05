@@ -10,6 +10,9 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  FormGroup,
+  Label,
+  Col,
 } from "reactstrap";
 import { pathOr } from "ramda";
 
@@ -25,8 +28,20 @@ import {
 } from "../utils/device-control";
 
 export const DeviceNavigate = () => {
-  const { state } = useContext(CounterContext);
-  const device = pathOr({}, ["devices", 0], state);
+  const {
+    state: { devices },
+  } = useContext(CounterContext);
+  const [device, setDevice] = useState({});
+
+  const selectDevice = (serial) => {
+    const d = devices.filter((d) => d.serial === serial)[0];
+    if (d && d.present) {
+      setDevice(d);
+    } else {
+      setDevice({});
+    }
+  };
+
   const browsers = pathOr([], ["browser", "apps"], device);
 
   const [splitButtonOpen, setSplitButtonOpen] = useState(false);
@@ -59,8 +74,25 @@ export const DeviceNavigate = () => {
   }, []);
   return (
     <div>
-      Device: {device.marketName}
-      {browser ? (
+      <FormGroup row>
+        <Label for="exampleSelect" sm={2}>
+          Select Device
+        </Label>
+        <Col sm={10}>
+          <select
+            value={device.serial}
+            onChange={(e) => selectDevice(e.target.value)}
+          >
+            <option></option>
+            {devices.map((d, i) => (
+              <option key={i} value={d.serial}>
+                {d.marketName}
+              </option>
+            ))}
+          </select>
+        </Col>
+      </FormGroup>
+      {device.present && browser ? (
         <div>
           <InputGroup>
             <InputGroupButtonDropdown
